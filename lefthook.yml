@@ -1,0 +1,15 @@
+pre-commit:
+  parallel: true
+  commands:
+    clean-code:
+      glob: "**/*.{ts,tsx,js,jsx,json,css}"
+      run: pnpm lint
+      stage_fixed: true
+
+pre-push:
+  parallel: true
+  commands:
+    run-tests:
+      run: pnpm test
+    audit:
+      run: pnpm audit
