@@ -13,7 +13,16 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { Model, SectionVariable, Variable } from "@/model";
+import {
+	updateInputValue,
+	updateSectionValue,
+} from "@/redux/features/model/reducer";
+import type {
+	Model,
+	SectionVariable,
+	Variable,
+} from "@/redux/features/model/types";
+import { store } from "@/redux/store";
 
 export class Engine {
 	private model: Model;
@@ -57,7 +66,15 @@ export class Engine {
 															<FormControl>
 																<Input
 																	value={field.value}
-																	onChange={field.onChange}
+																	onChange={(e) => {
+																		store.dispatch(
+																			updateInputValue({
+																				id: variable.id,
+																				value: e.target.value,
+																			}),
+																		);
+																		field.onChange(e);
+																	}}
 																/>
 															</FormControl>
 															<FormMessage />
@@ -93,7 +110,16 @@ export class Engine {
 																	<FormControl>
 																		<Input
 																			value={field.value}
-																			onChange={field.onChange}
+																			onChange={(e) => {
+																				store.dispatch(
+																					updateSectionValue({
+																						sectionId: section.id,
+																						id: variable.id,
+																						value: e.target.value,
+																					}),
+																				);
+																				field.onChange(e);
+																			}}
 																		/>
 																	</FormControl>
 																	<FormDescription>
@@ -180,7 +206,7 @@ export class Engine {
 					[curr.id]: {
 						type: "section",
 						name: curr.name,
-						section: section.name,
+						sectionName: section.name,
 					},
 				});
 			}, variableObj);
@@ -264,15 +290,13 @@ export class Engine {
 			Variable["id"],
 			{ placeholderId: string; value: string }
 		>();
-		Object.entries(this.form.watch()).forEach(
-			([variableId, value], index: number) => {
-				const variable = variableObj[variableId as Variable["id"]];
-				map.set(variable.id, {
-					placeholderId: placeholderIds[index],
-					value,
-				});
-			},
-		);
+		Object.entries(formData).forEach(([variableId, value], index: number) => {
+			const variable = variableObj[variableId as Variable["id"]];
+			map.set(variable.id, {
+				placeholderId: placeholderIds[index],
+				value,
+			});
+		});
 
 		const placeholderIdToValue: { [placeholderId: string]: string } = {};
 		const variableIdToValue: { [_: Variable["id"]]: string } = {};
