@@ -13,6 +13,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import TextBadgeInput from "@/components/ui/input-with-badges";
 import {
 	updateInputValue,
 	updateSectionValue,
@@ -108,14 +109,15 @@ export class Engine {
 																<FormItem>
 																	<FormLabel>{variable.name}</FormLabel>
 																	<FormControl>
-																		<Input
-																			value={field.value}
+																		<TextBadgeInput
+																			options={this.buildVariables()}
+																			inputValue={field.value}
 																			onChange={(e) => {
 																				store.dispatch(
 																					updateSectionValue({
 																						sectionId: section.id,
 																						id: variable.id,
-																						value: e.target.value,
+																						value: e,
 																					}),
 																				);
 																				field.onChange(e);
@@ -182,6 +184,23 @@ export class Engine {
 		return values;
 	}
 
+	private buildVariables(): { id: Variable["id"]; name: Variable["name"] }[] {
+		let variables = this.model.inputs.map((input) => {
+			return {
+				id: input.id,
+				name: input.name,
+			};
+		});
+
+		for (const section of this.model.calculations) {
+			variables = section.variables.reduce((prev, variable) => {
+				return prev.concat({ id: variable.id, name: variable.name });
+			}, variables);
+		}
+
+		return variables;
+	}
+
 	private buildReadableFormulas() {
 		let variableObj: {
 			[_: Variable["id"]]: {
@@ -226,8 +245,8 @@ export class Engine {
 						}
 						const value = variableObj[matchedId];
 						return value.sectionName
-							? `"${value.sectionName}: ${value.name}"`
-							: `"${value.name}"`;
+							? `${value.sectionName}: ${value.name}`
+							: value.name;
 					},
 				);
 
