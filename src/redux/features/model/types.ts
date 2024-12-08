@@ -1,5 +1,6 @@
 type SectionUuid = Branded<string, "SectionUuid">;
 type VariableUuid = Branded<string, "VariableUuid">;
+type ChartUuid = Branded<string, "ChartUuid">;
 
 type BaseVariable = {
 	id: VariableUuid;
@@ -24,7 +25,27 @@ export type Section = {
 	variables: SectionVariable[];
 };
 
+export type Chart = {
+	id: ChartUuid;
+	type: "bar";
+	title: string;
+	description?: string;
+	data: {
+		x: {
+			ref: VariableUuid;
+			type: "label" | "value";
+			value?: string;
+		};
+		y: {
+			ref: VariableUuid;
+			type: "label" | "value";
+			value?: string;
+		};
+	}[];
+};
+
 export type Model = {
 	inputs: InputVariable[];
 	calculations: Section[];
+	charts: Chart[];
 };

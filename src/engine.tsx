@@ -24,6 +24,7 @@ import type {
 	Variable,
 } from "@/redux/features/model/types";
 import { store } from "@/redux/store";
+import { SampleChart } from "@/sample-chart";
 
 export class Engine {
 	private model: Model;
@@ -42,108 +43,146 @@ export class Engine {
 	render() {
 		return (
 			<Form {...this.form}>
-				<form
-					onChange={this.form.handleSubmit(
-						(values: z.infer<typeof this.schema>) => {
-							console.log(values);
-						},
-					)}
-				>
-					<div className="flex flex-col gap-10">
-						<section className="bg-card border border-border rounded-lg p-4">
-							<div className="flex flex-col gap-5">
-								<p>Inputs</p>
+				<div className="flex flex-row gap-10 items-center">
+					<form
+						onChange={this.form.handleSubmit(
+							(values: z.infer<typeof this.schema>) => {
+								console.log(values);
+							},
+						)}
+					>
+						<div className="flex flex-col gap-10">
+							<section className="bg-card border border-border rounded-lg p-4">
 								<div className="flex flex-col gap-5">
-									{this.model.inputs.map((variable) => {
-										return (
-											<FormField
-												key={variable.id}
-												control={this.form.control}
-												name={variable.id}
-												render={({ field }) => {
-													return (
-														<FormItem>
-															<FormLabel>{variable.name}</FormLabel>
-															<FormControl>
-																<Input
-																	value={field.value}
-																	onChange={(e) => {
-																		store.dispatch(
-																			updateInputValue({
-																				id: variable.id,
-																				value: e.target.value,
-																			}),
-																		);
-																		field.onChange(e);
-																	}}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													);
-												}}
-											/>
-										);
-									})}
-								</div>
-							</div>
-						</section>
-
-						{this.model.calculations.map((section) => {
-							return (
-								<section
-									className="bg-card border border-border rounded-lg p-4"
-									key={section.id}
-								>
+									<p>Inputs</p>
 									<div className="flex flex-col gap-5">
-										<p>{section.name}</p>
-										<div className="flex flex-col gap-5">
-											{section.variables.map((variable) => {
-												return (
-													<FormField
-														key={variable.id}
-														control={this.form.control}
-														name={variable.id}
-														render={({ field }) => {
-															return (
-																<FormItem>
-																	<FormLabel>{variable.name}</FormLabel>
-																	<FormControl>
-																		<TextBadgeInput
-																			options={this.buildVariables()}
-																			inputValue={field.value}
-																			onChange={(e) => {
-																				store.dispatch(
-																					updateSectionValue({
-																						sectionId: section.id,
-																						id: variable.id,
-																						value: e,
-																					}),
-																				);
-																				field.onChange(e);
-																			}}
-																		/>
-																	</FormControl>
-																	<FormDescription>
-																		{this.buildReadableFormulas()[variable.id]}
-																	</FormDescription>
-																	<FormDescription>
-																		Result: {this.buildResult()[variable.id]}
-																	</FormDescription>
-																	<FormMessage />
-																</FormItem>
-															);
-														}}
-													/>
-												);
-											})}
-										</div>
+										{this.model.inputs.map((variable) => {
+											return (
+												<FormField
+													key={variable.id}
+													control={this.form.control}
+													name={variable.id}
+													render={({ field }) => {
+														return (
+															<FormItem>
+																<FormLabel>{variable.name}</FormLabel>
+																<FormControl>
+																	<Input
+																		value={field.value}
+																		onChange={(e) => {
+																			store.dispatch(
+																				updateInputValue({
+																					id: variable.id,
+																					value: e.target.value,
+																				}),
+																			);
+																			field.onChange(e);
+																		}}
+																	/>
+																</FormControl>
+																<FormMessage />
+															</FormItem>
+														);
+													}}
+												/>
+											);
+										})}
 									</div>
-								</section>
+								</div>
+							</section>
+
+							{this.model.calculations.map((section) => {
+								return (
+									<section
+										className="bg-card border border-border rounded-lg p-4"
+										key={section.id}
+									>
+										<div className="flex flex-col gap-5">
+											<p>{section.name}</p>
+											<div className="flex flex-col gap-5">
+												{section.variables.map((variable) => {
+													return (
+														<FormField
+															key={variable.id}
+															control={this.form.control}
+															name={variable.id}
+															render={({ field }) => {
+																return (
+																	<FormItem>
+																		<FormLabel>{variable.name}</FormLabel>
+																		<FormControl>
+																			<TextBadgeInput
+																				options={this.buildVariables()}
+																				inputValue={field.value}
+																				onChange={(e) => {
+																					store.dispatch(
+																						updateSectionValue({
+																							sectionId: section.id,
+																							id: variable.id,
+																							value: e,
+																						}),
+																					);
+																					field.onChange(e);
+																				}}
+																			/>
+																		</FormControl>
+																		<FormDescription>
+																			{
+																				this.buildReadableFormulas()[
+																					variable.id
+																				]
+																			}
+																		</FormDescription>
+																		<FormDescription>
+																			Result: {this.buildResult()[variable.id]}
+																		</FormDescription>
+																		<FormMessage />
+																	</FormItem>
+																);
+															}}
+														/>
+													);
+												})}
+											</div>
+										</div>
+									</section>
+								);
+							})}
+						</div>
+					</form>
+					<section className="bg-card border border-border rounded-lg p-4">
+						{this.model.charts.map((chart) => {
+							const data = chart.data.map((item) => {
+								const xData = item.x;
+								const yData = item.y;
+
+								const returnVal: { x: string | number; y: string | number } = {
+									x: "",
+									y: "",
+								};
+								if (xData.type === "label") {
+									returnVal.x = xData.value ?? "";
+								} else if (xData.type === "value") {
+									returnVal.x = this.buildResult()[xData.ref];
+								}
+								if (yData.type === "label") {
+									returnVal.y = yData.value ?? "";
+								} else if (yData.type === "value") {
+									returnVal.y = this.buildResult()[yData.ref];
+								}
+								return returnVal;
+							});
+							return (
+								<SampleChart
+									key={chart.id}
+									title={chart.title}
+									description={chart.description}
+									data={data}
+								/>
 							);
 						})}
-					</div>
-				</form>
+					</section>
+				</div>
 			</Form>
 		);
 	}
@@ -317,18 +356,15 @@ export class Engine {
 			});
 		});
 
-		const placeholderIdToValue: { [placeholderId: string]: string } = {};
-		const variableIdToValue: { [_: Variable["id"]]: string } = {};
+		const placeholderIdToValue: { [placeholderId: string]: number } = {};
+		const variableIdToValue: { [_: Variable["id"]]: number } = {};
 		map.forEach((data, variableId) => {
 			const newValue = recurseVariable(data.value);
-			let result = "";
+			let result = Number.NaN;
 			try {
-				result = Parser.evaluate(
-					newValue,
-					placeholderIdToValue,
-				).toLocaleString();
-			} catch {
-				result = "";
+				result = Parser.evaluate(newValue, placeholderIdToValue);
+			} catch (err) {
+				console.error(err);
 			}
 			placeholderIdToValue[data.placeholderId] = result;
 			variableIdToValue[variableId] = result;

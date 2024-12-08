@@ -1,4 +1,9 @@
-import type { Model, Section, Variable } from "@/redux/features/model/types";
+import type {
+	Chart,
+	Model,
+	Section,
+	Variable,
+} from "@/redux/features/model/types";
 
 export const INITIAL_DATA: Model = {
 	inputs: [
@@ -48,6 +53,37 @@ export const INITIAL_DATA: Model = {
 					name: "Annual cost to track and report",
 					formula: "{{3E9E1FBF-57B0-46A9-B960-F77EBB535277}} * 120000",
 					result: "",
+				},
+			],
+		},
+	],
+	charts: [
+		{
+			id: "4b62dddd-afa4-4e73-9376-c2a103f9d2d9" as Chart["id"],
+			type: "bar",
+			title: "Time effort to track and report",
+			data: [
+				{
+					x: {
+						ref: "3E9E1FBF-57B0-46A9-B960-F77EBB535277" as Variable["id"],
+						type: "label",
+						value: "Without X",
+					},
+					y: {
+						ref: "3E9E1FBF-57B0-46A9-B960-F77EBB535277" as Variable["id"],
+						type: "value",
+					},
+				},
+				{
+					x: {
+						ref: "241A01B8-67C3-4AB5-B856-9008CE73BA52" as Variable["id"],
+						type: "label",
+						value: "With X",
+					},
+					y: {
+						ref: "241A01B8-67C3-4AB5-B856-9008CE73BA52" as Variable["id"],
+						type: "value",
+					},
 				},
 			],
 		},
