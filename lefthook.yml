@@ -1,0 +1,31 @@
+pre-commit:
+  parallel: true
+  commands:
+    frontend-lint:
+      glob: "**/*.{ts,tsx,js,jsx,json,css}"
+      run: docker compose build frontend && docker run -it --rm fma-frontend pnpm lint
+      stage_fixed: true
+    backend-lint-golangci-lint:
+      glob: "**/*.go"
+      run: docker compose build backend && docker run -it --rm fma-backend golangci-lint run
+    backend-lint-errcheck:
+      glob: "**/*.go"
+      run: docker compose build backend && docker run -it --rm fma-backend errcheck ./...
+    backend-lint-vet:
+      glob: "**/*.go"
+      run: docker compose build backend && docker run -it --rm fma-backend go vet
+    backend-lint-format:
+      glob: "**/*.go"
+      run: docker compose build backend && docker run -it --rm fma-backend go fmt ./...
+    gitleaks:
+      run: docker run -v .:/app ghcr.io/gitleaks/gitleaks dir -v /app
+
+pre-push:
+  parallel: true
+  commands:
+    frontend-test:
+      run: docker compose build frontend && docker run -it --rm fma-frontend pnpm test
+    backend-test:
+      run: docker compose build backend && docker run -it --rm fma-backend go test
+    frontend-audit:
+      run: docker compose build frontend && docker run -it --rm fma-frontend pnpm audit

@@ -1,4 +1,4 @@
-/// <reference types="vite/client" />
+declare module '*.css'
 
 declare const __brand: unique symbol;
 type Brand<B> = { [__brand]: B };
