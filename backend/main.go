@@ -1,17 +1,25 @@
 package main
 
 import (
-	"net/http"
+	"fma-backend/bootstrap"
+	"fma-backend/route"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	app := bootstrap.App()
+	env := app.Env
+
+	db := app.Mongo.Database(env.DbName)
+	defer app.CloseDbConn()
+
+	gin := gin.Default()
+	timeout := time.Duration(env.DbContextTimeout) * time.Second
+	route.Setup(env, timeout, db, gin)
+	err := gin.Run()
+	if err != nil {
+		panic(err)
+	}
 }
